@@ -10,11 +10,23 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Load the required libraries
+
 ```{r}
 library(tidyverse)
 ```
 
-Data Preprocessing
+# Logistic Regression of Mushroom Dataset
+
+## Introduction
+
+The original Project 4 consisted of going through and processing spam/ not spam emails and labeling them as so. For this project,we explored the mushroom dataset from UCI Machine Learning Repo. The classification of mushrooms as edible or poisonous is important to public health, culinary arts, and biological research. For project 4, we will try to classify these mushrooms as poisonous or edible using a logistic regression model.
+
+## Data Preprocessing
+
+In the data preprocessing section of the project, several steps were taken to prepare the `mushroom` dataset for logistic regression analysis. First, the dataset was loaded into R for processing. The primary focus was to ensure that the data was 'tidy' and formatted correctly for analysis. This involved converting categorical variables into a suitable numeric format, as many machine learning algorithms, including logistic regression, work better with numerical input.
+
+During this conversion, each category within the variables was assigned a unique numerical identifier. This step is essential to preserve the categorical information in a form that the logistic regression model can utilize effectively. Additionally, the dataset was checked for missing values, and necessary imputations were performed to handle any gaps in the data, ensuring that the model receives a complete dataset for training and testing.
+
 ```{r}
 # Read the file
 url <- "https://raw.githubusercontent.com/Mattr5541/DATA_607_Project-4/main/mushroom/agaricus-lepiota_data.txt"
@@ -241,7 +253,14 @@ for (col in binary_cols) {
 }
 ```
 
-Exploratory Data Analysis
+## Exploratory Data Analysis
+
+For exploratory data analysis, a thorough examination of the `mushroom` dataset was conducted to gain insights into its characteristics and uncover any underlying patterns. This involved generating summary statistics; including measures like mean, median, and standard deviation for each variable.
+
+Bar plots were created for the various categorical features such as `ring_number`, `bruises`, `gill_size`, and `stalk_shape`. These visualizations are important in showing the frequency distribution of different categories within each feature. The bar plots also help to visualize the relationship between these categorical features and the target variable (edible or poisonous).
+
+A correlation matrix was made to provide insights into how different features are related to each other.
+
 ```{r}
 # Summary Statistics
 summary(df_num$ring_number)
@@ -287,14 +306,15 @@ df |>
   scale_y_log10()
 ```
 
-##Splitting the Data
+## Training Model
+
+### Splitting the Data
 
 We will be performing a simple machine learning procedure, so the next step will be to randomly split the dataset into an 70% / 30% ratio for training and testing, respectively
 
 ```{r}
 print(cor(df_num[, c(1:23)]))
 ```
-
 
 ```{r}
 #install.packages("caret")
@@ -312,7 +332,13 @@ train <- df_num[index,]
 test <- df_num[-index,]
 ```
 
-##Training the Model
+### Training the Model
+
+A logistic regression model was developed to predict whether a mushroom is edible or poisonous based on various features in the dataset. Logistic regression is a popular method for binary classification.
+
+First, we created the logistic regression model, specifying the target variable (edible or poisonous) as a function of the predictor variables. These predictors were `cap_shape`, `cap_color`, `gill_size`, and others. The training dataset, which consisted of 70% of the total data, was used to fit the model. This subset provided a substantial amount of data for the model to learn the patterns and relationships between the features and the target variable.
+
+Once the model was defined and the data was prepared, the next step involved training the model using the `glm()` function in R, specifying the binomial family to denote a logistic regression. During this training phase, the model learned the coefficients for each predictor, adjusting them to best fit the training data.
 
 ```{r}
 
@@ -341,9 +367,12 @@ train_model <- glm(class ~ cap_shape + cap_surface + cap_color + bruises + odor 
 summary(train_model)
 ```
 
-##Evaluate Training Data
+### Evaluate Training Data
 
-We can now use the model to make predictions on the training data ton evaluate its performance
+We can now use the model to make predictions on the training data to evaluate its performance.
+
+The results from the confusion matrix and cross-validation provided insights into how well the model was performing. They offered a detailed look at the model's strengths and weaknesses in classifying the mushrooms as edible or poisonous, based on the training data. This evaluation phase was critical for understanding the efficacy of the logistic regression model before proceeding to test it on unseen data.
+
 ```{r}
 #This code will generate predictions
 train_pred <- predict(train_model, type = "response", newdata = train)
@@ -365,8 +394,30 @@ print(cv_results)
 
 #As we can see, the RMSE value is low, whereas the R^2 is high, indicating that the model is likely a good fit 
 ```
-##Predictions for Our Test Data
-Now we can use the trained data to make predictions on our test data
+
+-   **Confusion Matrix**:
+
+    -   **True Negatives (1418)**: The model correctly identified 1418 mushrooms as non-poisonous (edible).
+    -   **False Positives (60)**: It mistakenly tagged 60 mushrooms as non-poisonous when they were actually poisonous.
+    -   **False Negatives (97)**: It incorrectly labeled 97 poisonous mushrooms as edible.
+    -   **True Positives (2376)**: And it got it right with 2376 mushrooms, accurately identifying them as poisonous.
+
+-   **Model Performance**:
+
+    -   **Accuracy:** 0.9603 or 96.03%
+    -   **95% Confidence Interval:** 0.9537 to 0.9661
+    -   **No Information Rate: 0.6166** meaning if we just guessed the most common outcome every time, we'd be right about 61.66% of the time.
+    -   **Kappa:** 0.9156
+    -   **Sensitivity:** 0.9360 meaning 93.6% of the time, the model correctly identifies poisonous mushrooms.
+    -   **Specificity:** 0.9754
+    -   **Positive Predictive Value :** 0.9594meaning it predicts a mushroom is edible, it's correct about 95.94% of the time.
+    -   **Negative Predictive Value:** 0.9608 which means that when it predicts a mushroom is poisonous, it's correct about 96.08% of the time.
+
+    According to the results, the model is doing a good job at classifying mushrooms as edible or poisonous.
+
+## Predictions for Our Test Data
+
+The test dataset, which comprised 30% of the entire dataset, was used for this purpose. It contained the same features as the training set but had not been used during the model training phase. The model made predictions on this test data, estimating whether each mushroom was edible or poisonous based on the learned patterns from the training data.
 
 ```{r}
 #This code will apply the model to our test dataset
@@ -390,3 +441,45 @@ auc(rocCurve)
 #The plot and diagnostics demonstrate the high predictive accuracy of our model 
 ```
 
+-   **Confusion Matrix**:
+
+    -   `True Negatives (0,0)`: 596 - The model correctly predicted 596 instances where mushrooms were not poisonous (edible).
+    -   `False Positives (0,1)`: 26 - The model incorrectly predicted 26 instances as non-poisonous (edible) when they were actually poisonous.
+    -   `False Negatives (1,0)`: 45 - The model incorrectly predicted 45 instances as poisonous when they were actually non-poisonous (edible).
+    -   `True Positives (1,1)`: 1026 - The model correctly predicted 1026 instances where mushrooms were poisonous.
+
+-   **Accuracy**: Our model was correct for 95.81% (0.9581) of the mushrooms in the test set. We are 95% confident that it lies in this range (0.9474, 0.9671).
+
+-   **No Information Rate**: 0.6214.This means if we were to guess the most common class for every mushroom, we'd be right about 62.14% of the time.
+
+-   **P-Value**: \< 2e-16 - This p-value is extremely low. Our model is statistically significant
+
+-   **Kappa**: 0.9104 - Since the kappa is close to one, we know that our model is effective.
+
+-   **Sensitivity and Specificity**:
+
+    -   Sensitivity (True Positive Rate): 0.9298 - About 93% of poisonous mushrooms were correctly identified.
+    -   Specificity (True Negative Rate): 0.9753 - About 97.53% of non-poisonous mushrooms were correctly identified.
+
+-   **Predictive Values**:
+
+    -   Positive Predictive Value: 0.9582 - When the model predicts a mushroom is non-poisonous, it is correct about 95.82% of the time.
+    -   Negative Predictive Value: 0.9580 - When the model predicts a mushroom is poisonous, it is correct about 95.80% of the time.
+
+-   **Prevalence**: 0.3786 - 37.86% of the mushrooms in the test set were actually non-poisonous (edible).
+
+-   **Detection Rate**: 0.3520 - 35.20% of all mushrooms in the test set were correctly identified as non-poisonous by the model.
+
+-   **Detection Prevalence**: 0.3674 - 36.74% of all mushrooms were predicted as non-poisonous by the model.
+
+-   **Area Under the Curve (AUC)**: 0.9867 - This is very close to 1, meaning the model has good ability to differentiate between edible and poisonous mushrooms.
+
+## Conclusion
+
+In this project, we implemented and evaluated a logistic regression model to classify mushrooms as edible or poisonous,
+
+The logistic regression model, trained on the training set, demonstrated effective learning of the relationships between various mushroom features and their edibility status. The model's performance was initially evaluated on the training data using a confusion matrix and cross-validation, showing promising results.
+
+Our logistic regression model had good results, with high accuracy, sensitivity, and specificity. These outcomes suggest that the model effectively distinguishes between edible and poisonous mushrooms, aligning well with known characteristics of these fungi. Notably, features like odor, gill color, and cap shape have emerged as significant predictors.
+
+There are some results that we should explore in the future. For instance, the model's occasional confusion between certain classes of mushrooms, as evidenced by false positives and negatives, hint at smaller morphological or chemical similarities that aren't captured by the dataset. In the future, we could explore more complex models, like neural networks, to capture complex patterns. Integrating datasets from different geographic and environmental data could enhance the model's applicability to diverse real-world scenarios.
