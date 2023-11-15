@@ -1,0 +1,286 @@
+---
+title: "Project 4"
+author: "Jean Jimenez, Matthew Roland, & Kelly Eng"
+date: "2023-11-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load the required libraries
+```{r}
+library(tidyverse)
+```
+
+Data Preprocessing
+```{r}
+# Read the file
+file = readLines("mushroom/agaricus-lepiota_data.txt")
+
+split_data <- lapply(file, function(x) unlist(strsplit(x, ",")))
+
+# Convert the data to a dataframe
+df <- as.data.frame(do.call(rbind, split_data))
+
+# The names of the 23 columns as detailed in agaricus-lepiota_names.txt
+col_names = c('class', 'cap_shape', 'cap_surface', 'cap_color', 'bruises', 'odor', 'gill_attachment', 'gill_spacing', 'gill_size', 'gill_color', 'stalk_shape', 'stalk_root', 'stalk_surface_above_ring', 'stalk_surface_below_ring', 'stalk_color_above_ring', 'stalk_color_below_ring', 'veil_type', 'veil_color', 'ring_number', 'ring_type', 'spore_print_color', 'population', 'habitat')
+
+# Assign the names to each column of the dataframe
+names(df) <- col_names
+
+# The type of class for each mushroom is binary, poisonous or edible
+# There are no missing values for them, so ifelse() can be used
+df$class <- ifelse(df$class == 'p', 'poisonous', 'edible')
+
+# These columns also have binary values
+df$bruises <- ifelse(df$bruises == 't', 'bruises', 'no')
+df$gill_size <- ifelse(df$gill_size == 'b', 'broad', 'narrow')
+df$stalk_shape <- ifelse(df$stalk_shape == 'e', 'enlarging', 'tapering')
+df$veil_type <- ifelse(df$veil_type == 'p', 'partial', 'universal')
+
+# Rename all the values in each column to make them more clear as noted in agaricus-lepiota_names.txt
+# The same file states the only missing values are in the stalk_root column
+df <- df |>
+  mutate(cap_shape = case_when(
+    cap_shape == 'b' ~ 'bell', 
+    cap_shape == 'c' ~ 'conical', 
+    cap_shape == 'x' ~ 'convex',
+    cap_shape == 'f' ~ 'flat',
+    cap_shape == 'k' ~ 'knobbed',
+    TRUE ~ 'sunken'),
+    cap_surface = case_when(
+      cap_surface == 'f' ~ 'fibrous',
+      cap_surface == 'g' ~ 'grooves',
+      cap_surface == 's' ~ 'scaly',
+      TRUE ~ 'smooth'
+    ),
+    cap_color = case_when(
+      cap_color == 'n' ~ 'brown',
+      cap_color == 'b' ~ 'buff',
+      cap_color == 'c' ~ 'cinnamon',
+      cap_color == 'g' ~ 'gray',
+      cap_color == 'r' ~ 'green',
+      cap_color == 'p' ~ 'pink',
+      cap_color == 'u' ~ 'purple',
+      cap_color == 'e' ~ 'red',
+      cap_color == 'w' ~ 'white',
+      TRUE ~ 'yellow'
+    ),
+    odor = case_when(
+      odor == 'a' ~ 'almond',
+      odor == 'l' ~ 'anise',
+      odor == 'c' ~ 'creosote',
+      odor == 'y' ~ 'fishy',
+      odor == 'f' ~ 'foul',
+      odor == 'm' ~ 'musty',
+      odor == 'n' ~ 'none',
+      odor == 'p' ~ 'pungent',
+      TRUE ~ 'spicy'
+    ),
+    gill_attachment = case_when(
+      gill_attachment == 'a' ~ 'attached',
+      gill_attachment == 'd' ~ 'descending',
+      gill_attachment == 'f' ~ 'free',
+      TRUE ~ 'notched'
+    ),
+    gill_spacing = case_when(
+      gill_spacing == 'c' ~ 'close',
+      gill_spacing == 'w' ~ 'crowded',
+      TRUE ~ 'distant'
+    ),
+    gill_color = case_when(
+      gill_color == 'k' ~ 'black',
+      gill_color == 'n' ~ 'brown',
+      gill_color == 'b' ~ 'buff',
+      gill_color == 'h' ~ 'chocolate',
+      gill_color == 'g' ~ 'gray',
+      gill_color == 'r' ~ 'green',
+      gill_color == 'o' ~ 'orange',
+      gill_color == 'p' ~ 'pink',
+      gill_color == 'u' ~ 'purple',
+      gill_color == 'e' ~ 'red',
+      gill_color == 'w' ~ 'white',
+      TRUE ~ 'yellow'
+    ),
+    stalk_root = case_when(
+      stalk_root == 'b' ~ 'bulbous',
+      stalk_root == 'c' ~ 'club',
+      stalk_root == 'u' ~ 'cup',
+      stalk_root == 'e' ~ 'equal',
+      stalk_root == 'z' ~ 'rhizomorphs',
+      stalk_root == 'r' ~ 'rooted',
+      TRUE ~ NA
+    ),
+    stalk_surface_above_ring = case_when(
+      stalk_surface_above_ring == 'f' ~ 'fibrous',
+      stalk_surface_above_ring == 'y' ~ 'scaly',
+      stalk_surface_above_ring == 'k' ~ 'silky',
+      TRUE ~ 'smooth'
+    ),
+    stalk_surface_below_ring = case_when(
+      stalk_surface_below_ring == 'f' ~ 'fibrous',
+      stalk_surface_below_ring == 'y' ~ 'scaly',
+      stalk_surface_below_ring == 'k' ~ 'silky',
+      TRUE ~ 'smooth'
+      ),
+    stalk_color_above_ring = case_when(
+      stalk_color_above_ring == 'n' ~ 'brown',
+      stalk_color_above_ring == 'b' ~ 'buff',
+      stalk_color_above_ring == 'c' ~ 'cinnamon',
+      stalk_color_above_ring == 'g' ~ 'gray',
+      stalk_color_above_ring == 'o' ~ 'orange',
+      stalk_color_above_ring == 'p' ~ 'pink',
+      stalk_color_above_ring == 'e' ~ 'red',
+      stalk_color_above_ring == 'w' ~ 'white',
+      TRUE ~ 'yellow'
+    ),
+    stalk_color_below_ring = case_when(
+      stalk_color_below_ring == 'n' ~ 'brown',
+      stalk_color_below_ring == 'b' ~ 'buff',
+      stalk_color_below_ring == 'c' ~ 'cinnamon',
+      stalk_color_below_ring == 'g' ~ 'gray',
+      stalk_color_below_ring == 'o' ~ 'orange',
+      stalk_color_below_ring == 'p' ~ 'pink',
+      stalk_color_below_ring == 'e' ~ 'red',
+      stalk_color_below_ring == 'w' ~ 'white',
+      TRUE ~ 'yellow'
+    ),
+    veil_color = case_when(
+      veil_color == 'n' ~ 'brown',
+      veil_color == 'o' ~ 'orange',
+      veil_color == 'w' ~ 'white',
+      TRUE ~ 'yellow'
+    ),
+    ring_number = case_when(
+      ring_number == 'n' ~ '0',
+      ring_number == 'o' ~ '1',
+      TRUE ~ '2'
+    ),
+    ring_type = case_when(
+      ring_type == 'c' ~ 'cobwebby',
+      ring_type == 'e' ~ 'evanescent',
+      ring_type == 'f' ~ 'flaring',
+      ring_type == 'l' ~ 'large',
+      ring_type == 'n' ~ 'none',
+      ring_type == 'p' ~ 'pendant',
+      ring_type == 's' ~ 'sheathing',
+      TRUE ~ 'zone'
+    ),
+    spore_print_color = case_when(
+      spore_print_color == 'k' ~ 'black',
+      spore_print_color == 'n' ~ 'brown',
+      spore_print_color == 'b' ~ 'buff',
+      spore_print_color == 'h' ~ 'chocolate',
+      spore_print_color == 'r' ~ 'green',
+      spore_print_color == 'o' ~ 'orange',
+      spore_print_color == 'u' ~ 'purple',
+      spore_print_color == 'w' ~ 'white',
+      TRUE ~ 'yellow'
+    ),
+    population = case_when(
+      population == 'a' ~ 'abundant',
+      population == 'c' ~ 'clustered',
+      population == 'n' ~ 'numerous',
+      population == 's' ~ 'scattered',
+      population == 'v' ~ 'several',
+      TRUE ~ 'solitary'
+    ),
+    habitat = case_when(
+      habitat == 'g' ~ 'grasses',
+      habitat == 'l' ~ 'leaves',
+      habitat == 'm' ~ 'meadows',
+      habitat == 'p' ~ 'paths',
+      habitat == 'u' ~ 'urban',
+      habitat == 'w' ~ 'waste',
+      TRUE ~ 'woods'
+    ))
+
+# Convert the number of rings from character to numeric
+df$ring_number <- as.numeric(df$ring_number)
+
+# According to agaricus-lepopta_names.txt, there are 2480 missing attributes for the stalk_root column so we can filter those rows out
+df <- df |>
+  filter(!is.na(stalk_root))
+
+mushroom_colors <- c('brown', 'orange', 'white', 'yellow', 'buff', 'gray', 'pink', 'red', 'green', 'purple', 'cinnamon', 'black', 'chocolate')
+surface <- c('fibrous', 'scaly', 'silky', 'smooth')
+
+df$class <- as.numeric(factor(df$class, levels=c('poisonous', 'edible')))
+df$cap_shape <- as.numeric(factor(df$cap_shape, levels=c('bell', 'conical', 'convex', 'flat', 'knobbed', 'sunken')))
+df$cap_surface <- as.numeric(factor(df$cap_surface, levels=c('fibrous', 'grooves', 'scaly', 'smooth')))
+df$cap_color <- as.numeric(factor(df$cap_color, levels=mushroom_colors))
+df$bruises <- as.numeric(factor(df$bruises, levels=c('bruises', 'no')))
+df$odor <- as.numeric(factor(df$odor, levels=c('almond', 'anise', 'creosote', 'fishy', 'foul', 'musty', 'none', 'pungent' , 'spicy')))
+df$gill_attachment <- as.numeric(factor(df$gill_attachment, levels=c('attached','descending','free', 'notched')))
+df$gill_spacing <- as.numeric(factor(df$gill_spacing, levels=c('close', 'crowded', 'distant')))
+df$gill_size <- as.numeric(factor(df$gill_size, levels=c('broad', 'narrow')))
+df$gill_color <- as.numeric(factor(df$gill_color, levels=mushroom_colors))
+df$stalk_shape <- as.numeric(factor(df$stalk_shape, levels=c('enlarging', 'tapering')))
+df$stalk_root <- as.numeric(factor(df$stalk_root, levels=c('bulbous', 'club', 'cup', 'equal', 'rhizomorphs', 'rooted')))
+df$stalk_surface_above_ring <- as.numeric(factor(df$stalk_surface_above_ring, levels=surface))
+df$stalk_surface_below_ring <- as.numeric(factor(df$stalk_surface_below_ring, levels=surface))
+df$stalk_color_above_ring <- as.numeric(factor(df$stalk_color_above_ring, levels=mushroom_colors))
+df$stalk_color_below_ring <- as.numeric(factor(df$stalk_color_below_ring, levels=mushroom_colors))
+df$veil_type <- as.numeric(factor(df$veil_type, levels=c('partial', 'universal')))
+df$veil_color <- as.numeric(factor(df$veil_color, levels=mushroom_colors))
+df$ring_type <- as.numeric(factor(df$ring_type, levels=c('cobwebby', 'evanescent', 'flaring', 'large', 'none', 'pendant', 'sheathing', 'zone')))
+df$spore_print_color <- as.numeric(factor(df$spore_print_color, levels=mushroom_colors))
+df$population <- as.numeric(factor(df$population, levels=c('abundant', 'clustered', 'numerous', 'scattered', 'several', 'solitary')))
+df$habitat <- as.numeric(factor(df$habitat, levels=c('grasses', 'leaves', 'meadows', 'paths', 'urban', 'waste', 'woods')))
+
+# Convert the binary columns to zeros and ones
+# Veil type is also binary but it only contains partial for all columns, there's not a single row that contains universal for the column
+binary_cols <- c(1, 5, 9, 11)
+for (col in binary_cols) {
+  df[[col]] <- df[[col]] - 1
+}
+```
+
+Exploratory Data Analysis
+```{r}
+# Summary Statistics
+summary(df$ring_number)
+
+# Gets the mode for all columns
+# The type of mushrooms that appear the most in this dataset are poisonous
+df |>
+  summarise(across(everything(), ~as.numeric(names(which.max(table(.))))))
+
+# The amount of mushrooms with 1 or 2 rings are similar for both poisonous and edible types
+# There are no mushrooms that are edible with 0 rings in this dataset
+df |>
+  ggplot(aes(x = ring_number)) +
+  geom_bar() +
+  facet_grid(. ~ class) +
+  labs(x="Number of Rings", "Count") +
+  scale_y_log10()
+
+# Comparing the binary columns
+
+# Poisonous mushrooms tends not to have bruises. Edible mushrooms tend to have more bruises
+df |>
+  ggplot(aes(x = bruises)) +
+  geom_bar() +
+  facet_grid(. ~ class) +
+  labs(x="Bruises?", "Count") +
+  scale_y_log10()
+
+# Both poisonous and edible mushrooms have more broad gill sizes than narrow
+df |>
+  ggplot(aes(x = gill_size)) +
+  geom_bar() +
+  facet_grid(. ~ class) +
+  labs(x="Type of Gill Size", "Count") +
+  scale_y_log10()
+
+# Poisonous mushrooms have more enlarging stalk shape than tapering while the opposite is true for edible mushrooms
+df |>
+  ggplot(aes(x = stalk_shape)) +
+  geom_bar() +
+  facet_grid(. ~ class) +
+  labs(x="Stalk Shape", "Count") +
+  scale_y_log10()
+```
+
