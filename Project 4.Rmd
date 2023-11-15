@@ -17,7 +17,8 @@ library(tidyverse)
 Data Preprocessing
 ```{r}
 # Read the file
-file = readLines("mushroom/agaricus-lepiota_data.txt")
+url <- "https://raw.githubusercontent.com/Mattr5541/DATA_607_Project-4/main/mushroom/agaricus-lepiota_data.txt"
+file = readLines(url)
 
 split_data <- lapply(file, function(x) unlist(strsplit(x, ",")))
 
@@ -207,45 +208,47 @@ df <- df |>
 mushroom_colors <- c('brown', 'orange', 'white', 'yellow', 'buff', 'gray', 'pink', 'red', 'green', 'purple', 'cinnamon', 'black', 'chocolate')
 surface <- c('fibrous', 'scaly', 'silky', 'smooth')
 
-df$class <- as.numeric(factor(df$class, levels=c('poisonous', 'edible')))
-df$cap_shape <- as.numeric(factor(df$cap_shape, levels=c('bell', 'conical', 'convex', 'flat', 'knobbed', 'sunken')))
-df$cap_surface <- as.numeric(factor(df$cap_surface, levels=c('fibrous', 'grooves', 'scaly', 'smooth')))
-df$cap_color <- as.numeric(factor(df$cap_color, levels=mushroom_colors))
-df$bruises <- as.numeric(factor(df$bruises, levels=c('bruises', 'no')))
-df$odor <- as.numeric(factor(df$odor, levels=c('almond', 'anise', 'creosote', 'fishy', 'foul', 'musty', 'none', 'pungent' , 'spicy')))
-df$gill_attachment <- as.numeric(factor(df$gill_attachment, levels=c('attached','descending','free', 'notched')))
-df$gill_spacing <- as.numeric(factor(df$gill_spacing, levels=c('close', 'crowded', 'distant')))
-df$gill_size <- as.numeric(factor(df$gill_size, levels=c('broad', 'narrow')))
-df$gill_color <- as.numeric(factor(df$gill_color, levels=mushroom_colors))
-df$stalk_shape <- as.numeric(factor(df$stalk_shape, levels=c('enlarging', 'tapering')))
-df$stalk_root <- as.numeric(factor(df$stalk_root, levels=c('bulbous', 'club', 'cup', 'equal', 'rhizomorphs', 'rooted')))
-df$stalk_surface_above_ring <- as.numeric(factor(df$stalk_surface_above_ring, levels=surface))
-df$stalk_surface_below_ring <- as.numeric(factor(df$stalk_surface_below_ring, levels=surface))
-df$stalk_color_above_ring <- as.numeric(factor(df$stalk_color_above_ring, levels=mushroom_colors))
-df$stalk_color_below_ring <- as.numeric(factor(df$stalk_color_below_ring, levels=mushroom_colors))
-df$veil_type <- as.numeric(factor(df$veil_type, levels=c('partial', 'universal')))
-df$veil_color <- as.numeric(factor(df$veil_color, levels=mushroom_colors))
-df$ring_type <- as.numeric(factor(df$ring_type, levels=c('cobwebby', 'evanescent', 'flaring', 'large', 'none', 'pendant', 'sheathing', 'zone')))
-df$spore_print_color <- as.numeric(factor(df$spore_print_color, levels=mushroom_colors))
-df$population <- as.numeric(factor(df$population, levels=c('abundant', 'clustered', 'numerous', 'scattered', 'several', 'solitary')))
-df$habitat <- as.numeric(factor(df$habitat, levels=c('grasses', 'leaves', 'meadows', 'paths', 'urban', 'waste', 'woods')))
+df_num <- df
+
+df_num$class <- as.numeric(factor(df_num$class, levels=c('poisonous', 'edible')))
+df_num$cap_shape <- as.numeric(factor(df_num$cap_shape, levels=c('bell', 'conical', 'convex', 'flat', 'knobbed', 'sunken')))
+df_num$cap_surface <- as.numeric(factor(df_num$cap_surface, levels=c('fibrous', 'grooves', 'scaly', 'smooth')))
+df_num$cap_color <- as.numeric(factor(df_num$cap_color, levels=mushroom_colors))
+df_num$bruises <- as.numeric(factor(df_num$bruises, levels=c('bruises', 'no')))
+df_num$odor <- as.numeric(factor(df_num$odor, levels=c('almond', 'anise', 'creosote', 'fishy', 'foul', 'musty', 'none', 'pungent' , 'spicy')))
+df_num$gill_attachment <- as.numeric(factor(df_num$gill_attachment, levels=c('attached','descending','free', 'notched')))
+df_num$gill_spacing <- as.numeric(factor(df_num$gill_spacing, levels=c('close', 'crowded', 'distant')))
+df_num$gill_size <- as.numeric(factor(df_num$gill_size, levels=c('broad', 'narrow')))
+df_num$gill_color <- as.numeric(factor(df_num$gill_color, levels=mushroom_colors))
+df_num$stalk_shape <- as.numeric(factor(df_num$stalk_shape, levels=c('enlarging', 'tapering')))
+df_num$stalk_root <- as.numeric(factor(df_num$stalk_root, levels=c('bulbous', 'club', 'cup', 'equal', 'rhizomorphs', 'rooted')))
+df_num$stalk_surface_above_ring <- as.numeric(factor(df_num$stalk_surface_above_ring, levels=surface))
+df_num$stalk_surface_below_ring <- as.numeric(factor(df_num$stalk_surface_below_ring, levels=surface))
+df_num$stalk_color_above_ring <- as.numeric(factor(df_num$stalk_color_above_ring, levels=mushroom_colors))
+df_num$stalk_color_below_ring <- as.numeric(factor(df_num$stalk_color_below_ring, levels=mushroom_colors))
+df_num$veil_type <- as.numeric(factor(df_num$veil_type, levels=c('partial', 'universal')))
+df_num$veil_color <- as.numeric(factor(df_num$veil_color, levels=mushroom_colors))
+df_num$ring_type <- as.numeric(factor(df_num$ring_type, levels=c('cobwebby', 'evanescent', 'flaring', 'large', 'none', 'pendant', 'sheathing', 'zone')))
+df_num$spore_print_color <- as.numeric(factor(df_num$spore_print_color, levels=mushroom_colors))
+df_num$population <- as.numeric(factor(df_num$population, levels=c('abundant', 'clustered', 'numerous', 'scattered', 'several', 'solitary')))
+df_num$habitat <- as.numeric(factor(df_num$habitat, levels=c('grasses', 'leaves', 'meadows', 'paths', 'urban', 'waste', 'woods')))
 
 # Convert the binary columns to zeros and ones
 # Veil type is also binary but it only contains partial for all columns, there's not a single row that contains universal for the column
 binary_cols <- c(1, 5, 9, 11)
 for (col in binary_cols) {
-  df[[col]] <- df[[col]] - 1
+  df_num[[col]] <- df_num[[col]] - 1
 }
 ```
 
 Exploratory Data Analysis
 ```{r}
 # Summary Statistics
-summary(df$ring_number)
+summary(df_num$ring_number)
 
 # Gets the mode for all columns
 # The type of mushrooms that appear the most in this dataset are poisonous
-df |>
+df_num |>
   summarise(across(everything(), ~as.numeric(names(which.max(table(.))))))
 
 # The amount of mushrooms with 1 or 2 rings are similar for both poisonous and edible types
@@ -282,5 +285,108 @@ df |>
   facet_grid(. ~ class) +
   labs(x="Stalk Shape", "Count") +
   scale_y_log10()
+```
+
+##Splitting the Data
+
+We will be performing a simple machine learning procedure, so the next step will be to randomly split the dataset into an 70% / 30% ratio for training and testing, respectively
+
+```{r}
+print(cor(df_num[, c(1:23)]))
+```
+
+
+```{r}
+#install.packages("caret")
+library(caret)
+
+#install.packages("brglm2")
+library(brglm2)
+
+#Setting a seed to keep the outcomes consistent
+set.seed(12345)
+
+index <- createDataPartition(df_num$class, p = .70, list = F)
+
+train <- df_num[index,]
+test <- df_num[-index,]
+```
+
+##Training the Model
+
+```{r}
+
+#Function to detect binary columns
+# is_bin <- function(train) {
+#   binary_col <- sapply(train, function(column) {
+#     all(column %in% c(0, 1))
+#   })
+#   return(binary_col)
+# }
+# 
+# binary_col <- is_bin(train)
+# 
+# print(binary_col)
+
+str(train)
+
+#The model properly converges when gill size and veil type are removed; but note that a warning is still produced: glm.fit: fitted probabilities numerically 0 or 1 occurred
+train_model <- glm(class ~ cap_shape + cap_surface + cap_color + bruises + odor + gill_attachment +
+               gill_spacing + gill_color + stalk_shape + stalk_root + 
+               stalk_surface_above_ring + stalk_surface_below_ring + 
+               stalk_color_above_ring + stalk_color_below_ring + veil_color + ring_number + 
+               ring_type + spore_print_color + population + habitat, data = train, family = binomial)
+
+
+summary(train_model)
+```
+
+##Evaluate Training Data
+
+We can now use the model to make predictions on the training data ton evaluate its performance
+```{r}
+#This code will generate predictions
+train_pred <- predict(train_model, type = "response", newdata = train)
+train_pred_class <- ifelse(train_pred > 0.5, 1, 0)
+
+#And now we can assess the acuracy of those predictions
+confusionMatrix(factor(train_pred_class), factor(train$class))
+
+#As we can see, our training data are able to predict edibility outcomes with a 96% accuracy
+
+#And now we can cross-validate the data
+cv_results <- train(class ~ cap_shape + cap_surface + cap_color + bruises + odor + gill_attachment +
+               gill_spacing + gill_color + stalk_shape + stalk_root + 
+               stalk_surface_above_ring + stalk_surface_below_ring + 
+               stalk_color_above_ring + stalk_color_below_ring + veil_color + ring_number + 
+               ring_type + spore_print_color + population + habitat, data = train, method = "glm",
+               trControl = trainControl(method = "cv", number = 10), family = 'binomial')
+print(cv_results)
+
+#As we can see, the RMSE value is low, whereas the R^2 is high, indicating that the model is likely a good fit 
+```
+##Predictions for Our Test Data
+Now we can use the trained data to make predictions on our test data
+
+```{r}
+#This code will apply the model to our test dataset
+test_pred <- predict(train_model, type = "response", newdata = test)
+
+test_pred_class <- ifelse(test_pred > 0.5, 1,0)
+
+#This code will check for accuracy
+confusionMatrix(factor(test_pred_class), factor(test$class))
+
+##As we can see, the results are rather consistent, with a 95.8% accuracy for predicting edibility
+
+library(pROC)
+
+#The following code will calculate the Area under the Curve
+rocCurve <- roc(test$class, test_pred)
+
+plot(rocCurve)
+auc(rocCurve)
+
+#The plot and diagnostics demonstrate the high predictive accuracy of our model 
 ```
 
