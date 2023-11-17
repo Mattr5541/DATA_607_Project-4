@@ -19,7 +19,7 @@ library(tidyverse)
 
 ## Introduction
 
-The original Project 4 consisted of going through and processing spam/ not spam emails and labeling them as so. For this project,we explored the mushroom dataset from UCI Machine Learning Repo. The classification of mushrooms as edible or poisonous is important to public health, culinary arts, and biological research. For project 4, we will try to classify these mushrooms as poisonous or edible using a logistic regression model.
+The original Project 4 consisted of going through and processing spam/ not spam emails and labeling them as so. For this project ,we explored the [mushroom dataset](https://archive.ics.uci.edu/dataset/73/mushroom) from UCI Machine Learning Repo. The classification of mushrooms as edible or poisonous is important to public health, culinary arts, and biological research. For project 4, we will try to classify these mushrooms as poisonous or edible using a logistic regression model.
 
 ## Data Preprocessing
 
@@ -473,6 +473,129 @@ auc(rocCurve)
 -   **Detection Prevalence**: 0.3674 - 36.74% of all mushrooms were predicted as non-poisonous by the model.
 
 -   **Area Under the Curve (AUC)**: 0.9867 - This is very close to 1, meaning the model has good ability to differentiate between edible and poisonous mushrooms.
+
+## Testing
+
+In UCI's Machine Learning Repository, there is a [secondary mushroom dataset](https://archive.ics.uci.edu/dataset/848/secondary+mushroom+dataset) with more data (but new entries). I will import this new data and test the accuracy of our logistic regression model for identifing whether or not mushrooms are poisonous or edible.
+
+### Secondary Mushroom Data Preprocessing
+
+Before we can use our test data, we must prepare it so that it is in the same format of the data used to train our linear model. Since not all columns included in our original model is in the secondary data set, we either have to create columns and estimate the data or train a new model without those columns. We chose to train a new model that will be used to evaluate the new dataset.
+
+```{r}
+secondary_dat=read.csv(url("https://raw.githubusercontent.com/Mattr5541/DATA_607_Project-4/main/mushroom/secondary_data.csv"))
+
+names(secondary_dat)
+
+col_names_sec = c('class','cap_diameter', 'cap_shape', 'cap_surface', 'cap_color', 'bruises',  'gill_attachment', 'gill_spacing', 'gill_color', 'stem_height', 'stem_width', 'stem_root', 'stem_surface', 'stem_color', 'veil_type', 'veil_color', 'has_ring', 'ring_type', 'spore_print_color', 'habitat', 'season')
+
+split_data = str_split_fixed(secondary_dat$class.cap.diameter.cap.shape.cap.surface.cap.color.does.bruise.or.bleed.gill.attachment.gill.spacing.gill.color.stem.height.stem.width.stem.root.stem.surface.stem.color.veil.type.veil.color.has.ring.ring.type.spore.print.color.habitat.season, pattern = ";", n = 21) 
+
+test_2_df=as.data.frame(split_data)
+
+names(test_2_df)=col_names_sec
+
+
+
+test_2_df$class = as.numeric(factor(test_2_df$class, levels=c('p','e')))
+
+test_2_df$cap_shape = as.numeric(factor(test_2_df$cap_shape, levels=c('b', 'c', 'x', 'f', 'k', 's')))
+
+
+
+test_2_df$cap_color = as.numeric(factor(test_2_df$cap_color, levels=c("n","o","w","y","b","g","p","e","r","u","c","k","l")))
+
+
+test_2_df$bruises = as.numeric(factor(test_2_df$bruises, levels=c('t', 'f')))
+
+test_2_df$gill_attachment = as.numeric(factor(test_2_df$gill_attachment, levels=c('a','d','e', 'f')))
+
+
+test_2_df$gill_color = as.numeric(factor(test_2_df$gill_color, levels=c("n","o","w","y","b","g","p","e","r","u","c","k","l")))
+
+
+test_2_df$veil_type = as.numeric(factor(test_2_df$veil_type, levels=c('p', 'u')))
+
+
+test_2_df$veil_color = as.numeric(factor(test_2_df$veil_color, levels=c("n","o","w","y","b","g","p","e","r","u","c","k","l")))
+
+
+test_2_df$habitat = as.numeric(factor(test_2_df$habitat, levels=c('g', 'l', 'm', 'p', 'u', 'w', 'd')))
+
+
+
+
+
+
+
+
+test_2 = test_2_df %>%
+  select(c(class,`cap_shape`,`cap_color`,bruises,`gill_attachment`, `gill_color`, `veil_type`,`veil_color`, `habitat`))
+
+train_model_2 = glm(class ~ cap_shape  + cap_color + bruises +  gill_attachment + gill_color +veil_type+ veil_color  + 
+                habitat, data = train, family = binomial)
+
+
+summary(train_model_2)
+
+#generate predictions
+train_pred_2 = predict(train_model_2, type = "response", newdata = train)
+train_pred_class_2 = ifelse(train_pred_2 > 0.5, 1, 0)
+
+#assess the acuracy of those predictions
+confusionMatrix(factor(train_pred_class_2), factor(train$class))
+
+cv_results_2 = train(class ~ cap_shape + cap_color + bruises + odor + gill_attachment + gill_color + veil_color + habitat, data = train, method = "glm",
+               trControl = trainControl(method = "cv", number = 10), family = 'binomial')
+print(cv_results_2)
+
+
+```
+
+The second model trained was a less accurate than the first one. But this was expected since the secondary dataset did not the complete set of columns as our original dataset. Lets evaluate this second model on our secondary test data.
+
+confusionMatrix(factor(test_pred_class_2), factor(test_2\$class))
+
+```{r}
+test_pred_2 = predict(train_model_2, type = "response", newdata = test_2)
+
+
+test_pred_class_2 = ifelse(test_pred_2 > 0.5, 2, 1)
+
+test_pred_class_2 = factor(test_pred_class_2, levels = c(1, 2))
+test_2$class = factor(test_2$class, levels = c(1, 2))
+
+
+confusionMatrix(test_pred_class_2, test_2$class)
+
+
+rocCurve_2 = roc(test_2$class, test_pred_2)
+
+plot(rocCurve_2)
+auc(rocCurve_2)
+```
+
+1.  **True Positives (2400)**: The model correctly predicted 2400 instances as 'poisonous' mushrooms.
+
+2.  **True Negatives (0)**: The model did not correctly predict any instances of 'edible' mushrooms.
+
+3.  **False Positives (945)**: The model incorrectly classified 945 instances as 'poisonous' , which were actually 'edible'.
+
+4.  **False Negatives (95)**: The model incorrectly classified 95 instances as 'edible', which were actually 'poisonous'.
+
+### Model Performance Metrics
+
+-   **Accuracy (69.77%)**: The model correctly predicted about 70% of the instances. However, this is below the No Information Rate, suggesting that the model might not be performing better than random guessing for this dataset.
+
+-   **Kappa (-0.0528)**: This means that the model is not suitable for this dataset.
+
+-   **Sensitivity (96.19%)**: The model is highly sensitive in predicting poisonous mushrooms but fails significantly in predicting edible mushrooms, as indicated by a specificity of 0%.
+
+-   **Specificity (0%)**: The model fails to correctly identify any true negatives (edible mushrooms)
+
+-   **Positive Predictive Value (71.75%)**: When the model predicts poisonous mushrooms, it is correct about 72% of the time.
+
+Our secondary model was not as accurate for predicting whether the secondary dataset is poisonous or not. In the future, I would consider using more columns and adding the missing values to my new dataset (either by inserting the mean, or individually mushroom by mushroom getting that data point). The more data a model has to train on, the better the model will get ideally.
 
 ## Conclusion
 
