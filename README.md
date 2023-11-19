@@ -1,6 +1,9 @@
 # DATA_607_Project-4
 
 By Team Android
+[Kelly Eng](https://github.com/autistic96)
+[Matthew Roland](https://github.com/Mattr5541)
+[Jean Jimenez](https://github.com/sleepysloth12)
 
 For this project, we will be using the Mushroom dataset sourced from the UCI Machine Learning Reporsitory to examine the most common traits that predict whether a mushroom is edible or poisonous.
 We also used a secondary mushroom dataset from UCI Machine Learning Reporsitory
